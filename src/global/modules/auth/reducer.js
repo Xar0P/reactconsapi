@@ -1,25 +1,27 @@
 import * as types from '../types';
 
 const initialState = {
-  botaoClicado: false,
+  isLoggedIn: false,
+  token: false,
+  user: {},
+  isLoading: false,
 };
 
 export default function reducer(state, action) {
   // eslint-disable-next-line no-param-reassign
   if (!state) state = initialState;
   switch (action.type) {
-    case types.BOTAO_CLICADO_SUCCESS: {
+    case types.LOGIN_SUCCESS: {
       const newState = { ...state };
-      newState.botaoClicado = !newState.botaoClicado;
+      newState.isLoggedIn = true;
+      newState.token = action.payload.token;
+      newState.user = action.payload.user;
       return newState;
     }
 
-    case types.BOTAO_CLICADO_FAILURE: {
-      return state;
-    }
-
-    case types.BOTAO_CLICADO_REQUEST: {
-      return state;
+    case types.LOGIN_FAILURE: {
+      const newState = { ...initialState };
+      return newState;
     }
 
     default: {

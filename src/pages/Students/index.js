@@ -38,7 +38,7 @@ export default function Students() {
             <span>{aluno.nome}</span>
             <span>{aluno.email}</span>
 
-            <Link to={`/aluno/${aluno.id}`}>
+            <Link to={`/aluno/${aluno.id}/edit`}>
               <FaEdit size={16} />
             </Link>
 
