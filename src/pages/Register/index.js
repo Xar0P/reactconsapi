@@ -1,19 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { isEmail } from 'validator';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { Container } from '../../styles/GlobalStyles';
 import { Form } from './styled';
-import axios from '../../services/axios';
 import Loading from '../../components/Loading/index';
+import * as actions from '../../global/modules/auth/actions';
 
 export default function Register() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { id } = useSelector((state) => state.auth.user);
+  const { nome: nomeStored } = useSelector((state) => state.auth.user);
+  const { email: emailStored } = useSelector((state) => state.auth.user);
+  const { isLoading } = useSelector((state) => state.auth);
+  const { registeredAnAccount } = useSelector((state) => state.auth);
+  const { loginAgain } = useSelector((state) => state.auth);
+
   const [nome, setNome] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Se tiver id quer dizer que o usuário está logado, então ele está editando seus dados
+    if (!id) return;
+
+    setNome(nomeStored);
+    setEmail(emailStored);
+  }, [id, nomeStored, emailStored]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -29,37 +46,33 @@ export default function Register() {
       toast.error('E-mail inválido');
     }
 
-    if (password.length < 6 || password.length > 50) {
+    if (!id && (password.length < 6 || password.length > 50)) {
       formErrors = true;
       toast.error('Senha deve ter entre 6 e 50 caracteres!');
     }
 
     if (formErrors) return;
 
-    setIsLoading(true);
-
-    try {
-      await axios.post('/users/', {
-        nome,
-        password,
-        email,
-      });
-      toast.success('Você fez seu cadastro com sucesso');
-      setIsLoading(false);
-
-      navigate('/login/');
-    } catch (err) {
-      const { errors } = err.response.data;
-      errors.map((error) => toast.error(error));
-      setIsLoading(false);
-    }
+    dispatch(actions.registerRequest({ nome, email, password, id }));
   }
+
+  useEffect(() => {
+    if (registeredAnAccount) {
+      navigate('/login/');
+      dispatch(actions.resetRegister());
+    }
+
+    if (loginAgain) {
+      navigate('/login/');
+      dispatch(actions.resetLoginAgain());
+    }
+  }, [loginAgain, registeredAnAccount, navigate, dispatch]);
 
   return (
     <Container>
       <Loading isLoading={isLoading} />
 
-      <h1>Crie sua conta</h1>
+      <h1>{id ? 'Editar dados' : 'Crie sua conta'}</h1>
 
       <Form onSubmit={handleSubmit}>
         <label htmlFor="nome">
@@ -89,7 +102,9 @@ export default function Register() {
             placeholder="Sua senha"
           />
         </label>
-        <button type="submit">Criar minha conta</button>
+        <button type="submit">
+          {id ? 'Salvar alterações' : 'Criar minha conta'}
+        </button>
       </Form>
     </Container>
   );
