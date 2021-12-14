@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { Container } from '../../styles/GlobalStyles';
 import { Form } from './styled';
 import * as actions from '../../global/modules/auth/actions';
+import Loading from '../../components/Loading/index';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ export default function Login() {
   const prevPath = get(location, 'state.prevPath', '/');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const isLogged = useSelector((state) => state.auth.isLoggedIn);
+  const isLoading = useSelector((state) => state.auth.isLoading);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -39,8 +42,6 @@ export default function Login() {
     dispatch(actions.loginRequest({ email, password }));
   }
 
-  const isLogged = useSelector((state) => state.auth.isLoggedIn);
-
   useEffect(() => {
     if (isLogged) {
       navigate(prevPath);
@@ -49,6 +50,7 @@ export default function Login() {
 
   return (
     <Container>
+      <Loading isLoading={isLoading} />
       <h1>Login</h1>
 
       <Form onSubmit={handleSubmit}>
@@ -62,7 +64,7 @@ export default function Login() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Seu e-mail"
+          placeholder="Sua senha"
         />
         <button type="submit">Acessar</button>
       </Form>

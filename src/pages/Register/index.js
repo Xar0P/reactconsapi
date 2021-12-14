@@ -6,12 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { Container } from '../../styles/GlobalStyles';
 import { Form } from './styled';
 import axios from '../../services/axios';
+import Loading from '../../components/Loading/index';
 
 export default function Register() {
   const navigate = useNavigate();
   const [nome, setNome] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -34,23 +36,29 @@ export default function Register() {
 
     if (formErrors) return;
 
+    setIsLoading(true);
+
     try {
       await axios.post('/users/', {
         nome,
         password,
         email,
       });
-
       toast.success('Você fez seu cadastro com sucesso');
+      setIsLoading(false);
+
       navigate('/login/');
     } catch (err) {
       const { errors } = err.response.data;
       errors.map((error) => toast.error(error));
+      setIsLoading(false);
     }
   }
 
   return (
     <Container>
+      <Loading isLoading={isLoading} />
+
       <h1>Crie sua conta</h1>
 
       <Form onSubmit={handleSubmit}>
@@ -69,7 +77,7 @@ export default function Register() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Seu nome"
+            placeholder="Seu email"
           />
         </label>
         <label htmlFor="senha">

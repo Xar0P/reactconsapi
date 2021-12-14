@@ -1,22 +1,28 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUserCircle, FaEdit, FaWindowClose } from 'react-icons/fa';
+
 import { Container } from '../../styles/GlobalStyles';
 import { StudentContainer, ProfilePicture } from './styled';
 import axios from '../../services/axios';
+import Loading from '../../components/Loading/index';
 
 export default function Students() {
   const [alunos, setAlunos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       const response = await axios.get('/alunos/');
       setAlunos(response.data);
+      setIsLoading(false);
     })();
   }, []);
 
   return (
     <Container>
+      <Loading isLoading={isLoading} />
       <h1>Alunos</h1>
       <StudentContainer>
         {alunos.map((aluno) => (
